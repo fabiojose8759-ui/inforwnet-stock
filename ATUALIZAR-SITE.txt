@@ -1,0 +1,14 @@
+COMO ATUALIZAR O SITE NO GITHUB
+
+1. Edite os arquivos do projeto normalmente.
+2. Clique duas vezes em atualizar-site.bat.
+3. Digite uma mensagem curta, por exemplo:
+   Ajusta tela de produtos
+4. Pressione ENTER e espere aparecer:
+   Pronto! Site atualizado no GitHub.
+
+Repositorio:
+https://github.com/fabiojose8759-ui/inforwnet-stock
+
+Observacao:
+Se o script avisar que existe conflito, me chame que eu resolvo com voce.
