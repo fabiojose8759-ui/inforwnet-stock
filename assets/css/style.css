@@ -98,6 +98,83 @@ body{
   font-family:var(--font-mono);
 }
 
+.topbar-menu{
+  display:flex;align-items:center;gap:2px;
+  height:100%;
+  flex:1;
+  padding-left:10px;
+  min-width:0;
+}
+
+.menu-root{
+  position:relative;
+  height:100%;
+  display:flex;align-items:center;
+}
+
+.menu-trigger{
+  height:100%;
+  display:flex;align-items:center;gap:6px;
+  border:0;background:transparent;
+  color:var(--c-text2);
+  padding:0 12px;
+  cursor:pointer;
+  font:600 12px var(--font);
+  transition:.12s;
+}
+
+.menu-trigger i{font-size:13px;color:var(--c-text3)}
+.menu-root:hover .menu-trigger,
+.menu-root:focus-within .menu-trigger{background:var(--c-surface2);color:var(--c-text)}
+
+.menu-dropdown,
+.menu-subdropdown{
+  position:absolute;
+  min-width:176px;
+  background:#3b3d40;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 16px 34px rgba(0,0,0,.45);
+  padding:5px 0;
+  z-index:500;
+  display:none;
+}
+
+.menu-dropdown{
+  top:100%;
+  left:0;
+}
+
+.menu-subdropdown{
+  top:-6px;
+  left:100%;
+}
+
+.menu-root:hover>.menu-dropdown,
+.menu-root:focus-within>.menu-dropdown,
+.has-submenu:hover>.menu-subdropdown,
+.has-submenu:focus-within>.menu-subdropdown{display:block}
+
+.menu-item{
+  width:100%;
+  min-height:29px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  color:#fff;
+  padding:7px 10px;
+  font:600 11px var(--font);
+  text-align:left;
+  white-space:nowrap;
+  background:transparent;
+  border:0;
+  cursor:pointer;
+  position:relative;
+}
+
+.menu-item i{font-size:13px;color:rgba(255,255,255,.7)}
+.menu-item:hover,
+.menu-item:focus-visible{background:#505357;color:#fff;outline:none}
+.menu-link.active{background:#505357}
+.menu-link{font-family:var(--font)}
+
 .topbar-right{display:flex;align-items:center;gap:10px}
 
 .sync-chip{
@@ -684,7 +761,12 @@ tbody tr:hover td{background:var(--c-surface2)}
   .form-grid,.form-grid.triple{grid-template-columns:1fr}
   .metrics{grid-template-columns:1fr 1fr}
   .filter-bar{grid-template-columns:1fr 1fr}
-  .topbar{padding:0 16px}
-  .topbar-brand{width:auto;border:none}
-  .topbar-time{display:none}
+  .topbar{padding:0 10px 0 0;gap:4px}
+  .topbar-brand{width:auto;border:none;padding:0 10px}
+  .brand-text{display:none}
+  .topbar-menu{padding-left:0;flex:0 1 auto}
+  .menu-trigger{padding:0 8px;font-size:11px}
+  .menu-dropdown{left:auto;right:0}
+  .menu-subdropdown{top:100%;left:auto;right:0}
+  .topbar-time,.sync-chip{display:none}
 }

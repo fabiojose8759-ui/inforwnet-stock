@@ -18,8 +18,10 @@ window.onload=()=>{const el=$('topbar-time');if(el)el.textContent=new Date().toL
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.menu-link').forEach(n=>n.classList.remove('active'));
   $(id)&&$(id).classList.add('active');
   document.querySelectorAll(`.nav-item[data-page="${id}"]`).forEach(n=>n.classList.add('active'));
+  document.querySelectorAll(`.menu-link[data-page="${id}"]`).forEach(n=>n.classList.add('active'));
   document.querySelectorAll('.os-dropdown').forEach(d=>d.style.display='none');
   if(id==='page-historico')renderHistorico();
   if(id==='page-dashboard')renderDash();
@@ -289,6 +291,11 @@ function abrirFoto(url){
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('lightbox').addEventListener('click',()=>document.getElementById('lightbox').classList.remove('show'));
   document.querySelectorAll('.nav-item[data-page]').forEach(item=>item.addEventListener('click',()=>showPage(item.dataset.page)));
+  document.querySelectorAll('.menu-link[data-page]').forEach(item=>item.addEventListener('click',()=>{
+    showPage(item.dataset.page);
+    if(item.dataset.tab)showTab(item.dataset.tab);
+    if(document.activeElement)document.activeElement.blur();
+  }));
   document.querySelectorAll('.tab[data-tab]').forEach(tab=>tab.addEventListener('click',()=>showTab(tab.dataset.tab)));
   loadAll();
 });

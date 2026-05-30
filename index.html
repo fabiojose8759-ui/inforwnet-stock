@@ -20,6 +20,51 @@
       <span class="brand-sub">Estoque v1.0</span>
     </div>
   </div>
+  <nav class="topbar-menu" aria-label="Menu principal">
+    <div class="menu-root">
+      <button class="menu-trigger" type="button">Estoque <i class="ti ti-chevron-down"></i></button>
+      <div class="menu-dropdown">
+        <div class="menu-item has-submenu" tabindex="0">
+          <span>Cadastros</span><i class="ti ti-chevron-right"></i>
+          <div class="menu-subdropdown">
+            <button class="menu-link menu-item" type="button" data-page="page-cadastro" data-tab="tab-novo-prod">Produtos</button>
+            <button class="menu-link menu-item" type="button" data-page="page-cadastro" data-tab="tab-categorias">Categorias</button>
+          </div>
+        </div>
+        <div class="menu-item has-submenu" tabindex="0">
+          <span>Consultas</span><i class="ti ti-chevron-right"></i>
+          <div class="menu-subdropdown">
+            <button class="menu-link menu-item" type="button" data-page="page-produtos">Produtos</button>
+            <button class="menu-link menu-item" type="button" data-page="page-historico">Histórico</button>
+            <button class="menu-link menu-item" type="button" data-page="page-galeria">Galeria de fotos</button>
+          </div>
+        </div>
+        <div class="menu-item has-submenu" tabindex="0">
+          <span>Movimentações</span><i class="ti ti-chevron-right"></i>
+          <div class="menu-subdropdown">
+            <button class="menu-link menu-item" type="button" data-page="page-entrada">Entrada</button>
+            <button class="menu-link menu-item" type="button" data-page="page-saida">Saída</button>
+          </div>
+        </div>
+        <div class="menu-item has-submenu" tabindex="0">
+          <span>Veículo Lançamento</span><i class="ti ti-chevron-right"></i>
+          <div class="menu-subdropdown">
+            <button class="menu-link menu-item" type="button" data-page="page-historico">Consulta por OS</button>
+            <button class="menu-link menu-item" type="button" data-page="page-saida">Baixa em veículo</button>
+            <button class="menu-link menu-item" type="button" data-page="page-entrada">Lançamento</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="menu-root">
+      <button class="menu-trigger" type="button">Relatórios <i class="ti ti-chevron-down"></i></button>
+      <div class="menu-dropdown">
+        <button class="menu-link menu-item" type="button" data-page="page-dashboard">Dashboard</button>
+        <button class="menu-link menu-item" type="button" data-page="page-historico">Histórico</button>
+        <button class="menu-link menu-item" type="button" data-page="page-galeria">Galeria de fotos</button>
+      </div>
+    </div>
+  </nav>
   <div class="topbar-right">
     <span class="sync-chip" id="sync-chip">
       <span class="dot"></span>
