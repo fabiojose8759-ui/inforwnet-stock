@@ -2,7 +2,7 @@
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkcXJ3ZW9xc2plZnl6b3dpYmpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NzAwNjcsImV4cCI6MjA5NTI0NjA2N30.S7N6_D_SXAjnIBY3tbmN0cMzy5AvbIo3eIEGSo7p6Ss';
 const sb=supabase.createClient(SB_URL,SB_KEY);
 let produtos=[],categorias=[],movimentacoes=[],orders=[];
-let selectedOS={ent:null,sai:null};
+let selectedOS={ent:null,sai:null,vei:null};
 const tipoLabel={corretiva:'Corretiva',instalacao_kit:'Instalação Kit',preventiva:'Preventiva',mudanca_endereco:'Mudança End.'};
 const tipoClass={corretiva:'corretiva',instalacao_kit:'instalacao',preventiva:'preventiva',mudanca_endereco:'mudanca'};
 function eqLabel(t){return!t?'—':t==='equipe1'?'Equipe 1':t==='equipe2'?'Equipe 2':t}
@@ -27,6 +27,7 @@ function showPage(id){
   if(id==='page-dashboard')renderDash();
   if(id==='page-galeria')renderGaleria();
   if(id==='page-produtos')renderProdutos();
+  if(id==='page-consultas')renderConsultas();
 }
 
 function showTab(tabId){
@@ -59,7 +60,7 @@ function populateSelects(){
   const fc=$('filter-cat');if(fc)fc.innerHTML='<option value="">Todas as categorias</option>'+catOpts;
   const cc=$('cad-cat');if(cc)cc.innerHTML='<option value="">Sem categoria</option>'+catOpts;
   const pOpts='<option value="">Selecione...</option>'+produtos.map(p=>`<option value="${p.id}">${p.nome} — ${p.estoque_atual} ${p.unidade}</option>`).join('');
-  ['ent-produto','sai-produto'].forEach(id=>{const el=$(id);if(el)el.innerHTML=pOpts});
+  ['ent-produto','sai-produto','vei-produto'].forEach(id=>{const el=$(id);if(el)el.innerHTML=pOpts});
   const fp=$('fil-prod');if(fp)fp.innerHTML='<option value="">Todos</option>'+produtos.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');
 }
 
@@ -101,6 +102,30 @@ function renderProdutos(){
     const st=p.estoque_atual<=0?'zero':p.estoque_atual<=p.estoque_minimo?'low':'ok';
     const stTxt=p.estoque_atual<=0?'ZERADO':p.estoque_atual<=p.estoque_minimo?'BAIXO':'OK';
     return`<tr><td><div style="display:flex;align-items:center;gap:10px">${p.foto_url?`<img src="${p.foto_url}" class="photo-thumb" onclick="abrirFoto('${p.foto_url}')" alt="foto">`:''}<div><div class="td-name">${p.nome}</div>${p.codigo?`<div class="td-meta">${p.codigo}</div>`:''}</div></div></td><td style="font-size:12px;color:var(--c-text2)">${p.estoque_categorias?.nome||'—'}</td><td style="font-family:var(--font-mono);font-size:12px;color:var(--c-text3)">${p.unidade}</td><td style="font-family:var(--font-mono);font-weight:600;font-size:15px">${p.estoque_atual}</td><td style="font-family:var(--font-mono);font-size:12px;color:var(--c-text3)">${p.estoque_minimo}</td><td><span class="badge ${st}">${stTxt}</span></td><td></td></tr>`;
+  }).join('');
+}
+
+function renderConsultas(){
+  const q=($('consulta-tec')?.value||'').toLowerCase();
+  const equipe=$('consulta-equipe')?.value||'';
+  const resumo={};
+  movimentacoes.forEach(m=>{
+    const tec=(m.tecnico||'Sem técnico').trim()||'Sem técnico';
+    if(q&&!tec.toLowerCase().includes(q))return;
+    if(equipe&&m.equipe!==equipe)return;
+    const key=tec+'|'+(m.equipe||'');
+    if(!resumo[key])resumo[key]={tec,equipe:m.equipe||'',entrada:0,saida:0,ultima:m.created_at};
+    resumo[key][m.tipo==='entrada'?'entrada':'saida']+=Number(m.quantidade)||0;
+    if(new Date(m.created_at)>new Date(resumo[key].ultima))resumo[key].ultima=m.created_at;
+  });
+  const tb=$('consulta-tec-body');
+  const linhas=Object.values(resumo).sort((a,b)=>new Date(b.ultima)-new Date(a.ultima));
+  if(tb)tb.innerHTML=!linhas.length?'<tr class="empty-row"><td colspan="5">Nenhum movimento encontrado</td></tr>':linhas.map(r=>`<tr><td class="td-name">${r.tec}</td><td>${eqLabel(r.equipe)}</td><td><span class="badge entrada">${r.entrada}</span></td><td><span class="badge saida">${r.saida}</span></td><td style="color:var(--c-text3);font-family:var(--font-mono);font-size:12px">${fmtDate(r.ultima)}</td></tr>`).join('');
+  const pb=$('consulta-prod-body');
+  if(pb)pb.innerHTML=!produtos.length?'<tr class="empty-row"><td colspan="5">Nenhum produto cadastrado</td></tr>':produtos.map(p=>{
+    const st=p.estoque_atual<=0?'zero':p.estoque_atual<=p.estoque_minimo?'low':'ok';
+    const stTxt=p.estoque_atual<=0?'ZERADO':p.estoque_atual<=p.estoque_minimo?'BAIXO':'OK';
+    return`<tr><td class="td-name">${p.nome}</td><td style="color:var(--c-text2)">${p.estoque_categorias?.nome||'—'}</td><td style="font-family:var(--font-mono)">${p.estoque_atual} ${p.unidade}</td><td style="color:var(--c-text3);font-family:var(--font-mono)">${p.estoque_minimo}</td><td><span class="badge ${st}">${stTxt}</span></td></tr>`;
   }).join('');
 }
 
@@ -163,6 +188,39 @@ function checkEstoque(){
   if(p&&p.estoque_atual<=0){al.className='alert danger';al.style.display='block';al.textContent='⚠ Produto zerado no estoque!'}
   else if(p&&p.estoque_atual<=p.estoque_minimo){al.className='alert warning';al.style.display='block';al.textContent=`⚠ Estoque baixo: apenas ${p.estoque_atual} ${p.unidade} restantes.`}
   else al.style.display='none';
+}
+
+function checkVeiculoEstoque(){
+  const id=$('vei-produto')?.value;const p=produtos.find(x=>x.id===id);const al=$('vei-alerta');if(!al)return;
+  if(p&&p.estoque_atual<=0){al.className='alert danger';al.style.display='block';al.textContent='Produto zerado no estoque.'}
+  else if(p&&p.estoque_atual<=p.estoque_minimo){al.className='alert warning';al.style.display='block';al.textContent=`Estoque baixo: ${p.estoque_atual} ${p.unidade}.`}
+  else al.style.display='none';
+}
+
+async function salvarVeiculo(){
+  const acao=$('vei-acao')?.value||'lancar';
+  const produto_id=$('vei-produto')?.value;
+  const quantidade=parseFloat($('vei-qtd')?.value);
+  if(!produto_id){toast('Selecione um produto','err');return}
+  if(!quantidade||quantidade<=0){toast('Informe uma quantidade válida','err');return}
+  const tipo=acao==='devolver'?'entrada':'saida';
+  const motivo=acao==='devolver'?'Devolução de técnico':acao==='baixar'?'Baixa em veículo / OS':'Lançamento para veículo';
+  if(tipo==='saida'){
+    const prod=produtos.find(p=>p.id===produto_id);
+    if(prod&&prod.estoque_atual<quantidade){
+      const al=$('vei-alerta');if(al){al.className='alert danger';al.style.display='block';al.textContent=`Estoque insuficiente. Disponível: ${prod.estoque_atual} ${prod.unidade}.`}
+      return;
+    }
+  }
+  const data={produto_id,tipo,quantidade,motivo,os_numero:$('vei-os')?.value||null,tecnico:$('vei-tec')?.value||null,equipe:$('vei-equipe')?.value||null,observacao:$('vei-obs')?.value||null};
+  const{error}=await sb.from('estoque_movimentacoes').insert([data]);
+  if(error){toast('Erro: '+error.message,'err');return}
+  toast('Lançamento salvo','ok');
+  clearOS('vei');
+  ['vei-produto','vei-qtd','vei-obs'].forEach(id=>{const el=$(id);if(el)el.value=''});
+  const al=$('vei-alerta');if(al)al.style.display='none';
+  await loadAll();
+  showPage('page-veiculo');
 }
 
 async function salvarMovimento(tipo){

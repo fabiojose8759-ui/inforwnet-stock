@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Familjen+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="assets/css/style.css?v=menu-2">
+<link rel="stylesheet" href="assets/css/style.css?v=sgp-1">
 </head>
 <body>
 
@@ -34,6 +34,7 @@
         <div class="menu-item has-submenu" tabindex="0">
           <span>Consultas</span><i class="ti ti-chevron-right"></i>
           <div class="menu-subdropdown">
+            <button class="menu-link menu-item" type="button" data-page="page-consultas">Saldo / Técnico</button>
             <button class="menu-link menu-item" type="button" data-page="page-produtos">Produtos</button>
             <button class="menu-link menu-item" type="button" data-page="page-historico">Histórico</button>
             <button class="menu-link menu-item" type="button" data-page="page-galeria">Galeria de fotos</button>
@@ -49,9 +50,9 @@
         <div class="menu-item has-submenu" tabindex="0">
           <span>Veículo Lançamento</span><i class="ti ti-chevron-right"></i>
           <div class="menu-subdropdown">
+            <button class="menu-link menu-item" type="button" data-page="page-veiculo">Lançamento</button>
+            <button class="menu-link menu-item" type="button" data-page="page-veiculo">Baixa em veículo</button>
             <button class="menu-link menu-item" type="button" data-page="page-historico">Consulta por OS</button>
-            <button class="menu-link menu-item" type="button" data-page="page-saida">Baixa em veículo</button>
-            <button class="menu-link menu-item" type="button" data-page="page-entrada">Lançamento</button>
           </div>
         </div>
       </div>
@@ -85,8 +86,10 @@
     <div class="nav-item" data-page="page-produtos"><i class="ti ti-package"></i>Produtos<span class="nav-badge" id="nav-badge-alerta" style="display:none">0</span></div>
     <div class="nav-item" data-page="page-entrada"><i class="ti ti-arrow-bar-to-down"></i>Entrada</div>
     <div class="nav-item" data-page="page-saida"><i class="ti ti-arrow-bar-up"></i>Saída</div>
+    <div class="nav-item" data-page="page-veiculo"><i class="ti ti-truck"></i>Veículo Lançamento</div>
 
     <div class="nav-group-label">Relatórios</div>
+    <div class="nav-item" data-page="page-consultas"><i class="ti ti-search"></i>Consultas</div>
     <div class="nav-item" data-page="page-historico"><i class="ti ti-history"></i>Histórico</div>
     <div class="nav-item" data-page="page-galeria"><i class="ti ti-photo"></i>Galeria de fotos</div>
 
@@ -174,6 +177,27 @@
       </div>
     </section>
 
+    <!-- CONSULTAS -->
+    <section class="page" id="page-consultas">
+      <div class="page-header"><div><div class="page-title">Consultas</div><div class="page-sub">Saldo, movimentações e materiais por técnico</div></div></div>
+      <div class="filter-bar">
+        <div><label>Técnico</label><input type="text" id="consulta-tec" placeholder="Nome do técnico" oninput="renderConsultas()"></div>
+        <div><label>Equipe</label><select id="consulta-equipe" onchange="renderConsultas()"><option value="">Todas</option><option value="equipe1">Equipe 1</option><option value="equipe2">Equipe 2</option></select></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-user-cog"></i>Movimentações por técnico / veículo</div>
+        <div class="table-wrap" style="border:none;border-radius:0;margin:-4px -2px 0">
+          <table><thead><tr><th>Técnico</th><th>Equipe</th><th>Entradas</th><th>Saídas</th><th>Última mov.</th></tr></thead><tbody id="consulta-tec-body"></tbody></table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-package"></i>Saldo geral de estoque</div>
+        <div class="table-wrap" style="border:none;border-radius:0;margin:-4px -2px 0">
+          <table><thead><tr><th>Produto</th><th>Categoria</th><th>Atual</th><th>Mínimo</th><th>Status</th></tr></thead><tbody id="consulta-prod-body"></tbody></table>
+        </div>
+      </div>
+    </section>
+
     <!-- ENTRADA -->
     <section class="page" id="page-entrada">
       <div class="page-header"><div><div class="page-title">Registrar entrada</div><div class="page-sub">Compra, devolução ou ajuste de estoque</div></div></div>
@@ -256,6 +280,37 @@
         </div>
         <div id="sai-alerta" class="alert"></div>
         <div class="btn-row"><button class="btn danger" onclick="salvarMovimento('saida')"><i class="ti ti-check"></i>Confirmar saída</button></div>
+      </div>
+    </section>
+
+    <!-- VEÍCULO LANÇAMENTO -->
+    <section class="page" id="page-veiculo">
+      <div class="page-header"><div><div class="page-title">Veículo Lançamento</div><div class="page-sub">Lançar, baixar ou devolver material vinculado à OS/técnico</div></div></div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-truck"></i>Movimentação do veículo</div>
+        <div class="form-grid">
+          <div class="field"><label>Ação *</label><select id="vei-acao"><option value="lancar">Lançar para veículo</option><option value="baixar">Baixar em OS</option><option value="devolver">Devolução do técnico</option></select></div>
+          <div class="field"><label>Produto *</label><select id="vei-produto" onchange="checkVeiculoEstoque()"><option value="">Selecione...</option></select></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Quantidade *</label><input type="number" id="vei-qtd" min="0.01" step="0.01" placeholder="0"></div>
+          <div class="field"><label>Técnico / veículo</label><input type="text" id="vei-tec" placeholder="Nome do técnico ou veículo"></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Equipe</label><select id="vei-equipe"><option value="">—</option><option value="equipe1">Equipe 1</option><option value="equipe2">Equipe 2</option></select></div>
+          <div class="field"><label>Nº OS</label><input type="text" id="vei-os" placeholder="Opcional"></div>
+        </div>
+        <div class="os-picker" style="margin-bottom:14px">
+          <div id="vei-os-selected" class="os-selected-box" style="display:none"></div>
+          <div id="vei-os-search-wrap" class="os-search-wrap">
+            <i class="ti ti-search os-search-icon"></i>
+            <input type="text" id="vei-os-search" placeholder="Buscar OS para preencher automático..." autocomplete="off" oninput="filterOS('vei')" onfocus="showOSDropdown('vei')">
+            <div class="os-dropdown" id="vei-os-dropdown"></div>
+          </div>
+        </div>
+        <div class="form-grid single"><div class="field"><label>Observação</label><textarea id="vei-obs" placeholder="Opcional..."></textarea></div></div>
+        <div id="vei-alerta" class="alert"></div>
+        <div class="btn-row"><button class="btn primary" onclick="salvarVeiculo()"><i class="ti ti-check"></i>Salvar lançamento</button></div>
       </div>
     </section>
 
@@ -353,7 +408,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="assets/js/app.js?v=menu-2"></script>
+<script src="assets/js/app.js?v=sgp-1"></script>
 <div id="lightbox"><img src="" alt="foto ampliada"></div>
 </body>
 </html>
