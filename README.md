@@ -1,4 +1,6 @@
-# Estoque Inforwnet Telecom
+# inforwnet-stock
+
+Sistema de estoque Inforwnet Telecom.
 
 Aplicacao web estatica para controle de estoque, produtos, categorias, ordens de servico e movimentacoes.
 
