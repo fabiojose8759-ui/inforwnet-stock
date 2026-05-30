@@ -1,0 +1,314 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estoque — Inforwnet Telecom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Familjen+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-dot">I</div>
+    <div class="brand-text">
+      <span class="brand-name">Inforwnet</span>
+      <span class="brand-sub">Estoque v1.0</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="sync-chip" id="sync-chip">
+      <span class="dot"></span>
+      <span id="sync-txt">Conectando...</span>
+    </span>
+    <span class="topbar-time" id="topbar-time">--:--</span>
+    <button class="icon-btn" onclick="loadAll()" title="Atualizar"><i class="ti ti-refresh"></i></button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-group-label">Visão geral</div>
+    <div class="nav-item active" data-page="page-dashboard"><i class="ti ti-layout-dashboard"></i>Dashboard</div>
+
+    <div class="nav-group-label">Movimentações</div>
+    <div class="nav-item" data-page="page-produtos"><i class="ti ti-package"></i>Produtos<span class="nav-badge" id="nav-badge-alerta" style="display:none">0</span></div>
+    <div class="nav-item" data-page="page-entrada"><i class="ti ti-arrow-bar-to-down"></i>Entrada</div>
+    <div class="nav-item" data-page="page-saida"><i class="ti ti-arrow-bar-up"></i>Saída</div>
+
+    <div class="nav-group-label">Relatórios</div>
+    <div class="nav-item" data-page="page-historico"><i class="ti ti-history"></i>Histórico</div>
+    <div class="nav-item" data-page="page-galeria"><i class="ti ti-photo"></i>Galeria de fotos</div>
+
+    <div class="nav-group-label">Configurações</div>
+    <div class="nav-item" data-page="page-cadastro"><i class="ti ti-settings-2"></i>Cadastros</div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-text" id="last-update">Aguardando sync...</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub">Visão geral do estoque em tempo real</div>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric" style="--accent-color:var(--c-blue);--accent-bg:var(--c-blue-bg)">
+          <div class="metric-accent"></div>
+          <div class="metric-icon"><i class="ti ti-package"></i></div>
+          <div class="metric-val" id="m-total">—</div>
+          <div class="metric-label">Total de itens</div>
+        </div>
+        <div class="metric" style="--accent-color:var(--c-yellow);--accent-bg:var(--c-yellow-bg)">
+          <div class="metric-accent"></div>
+          <div class="metric-icon"><i class="ti ti-alert-triangle"></i></div>
+          <div class="metric-val" id="m-baixo">—</div>
+          <div class="metric-label">Estoque baixo</div>
+        </div>
+        <div class="metric" style="--accent-color:var(--c-red);--accent-bg:var(--c-red-bg)">
+          <div class="metric-accent"></div>
+          <div class="metric-icon"><i class="ti ti-circle-x"></i></div>
+          <div class="metric-val" id="m-zero">—</div>
+          <div class="metric-label">Zerados</div>
+        </div>
+        <div class="metric" style="--accent-color:var(--c-green);--accent-bg:var(--c-green-bg)">
+          <div class="metric-accent"></div>
+          <div class="metric-icon"><i class="ti ti-list-check"></i></div>
+          <div class="metric-val" id="m-os-hoje">—</div>
+          <div class="metric-label">OS hoje</div>
+        </div>
+        <div class="metric" style="--accent-color:var(--c-accent);--accent-bg:var(--c-accent-glow)">
+          <div class="metric-accent"></div>
+          <div class="metric-icon"><i class="ti ti-arrows-transfer-up"></i></div>
+          <div class="metric-val" id="m-hoje">—</div>
+          <div class="metric-label">Mov. hoje</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-alert-triangle"></i>Alertas de estoque</div>
+        <div id="alertas-list"><div style="text-align:center;color:var(--c-text3);padding:32px;font-family:var(--font-mono);font-size:12px">Carregando...</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-list-check"></i>OS de hoje — <span id="dash-os-date" style="color:var(--c-text2);letter-spacing:0;text-transform:none;font-family:var(--font)"></span></div>
+        <div class="table-wrap" style="border:none;border-radius:0;margin:-4px -2px 0">
+          <table><thead><tr><th>Nº OS</th><th>Tipo</th><th>Equipe</th><th>Técnico</th><th></th></tr></thead><tbody id="dash-os-list"></tbody></table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="ti ti-clock"></i>Últimas movimentações</div>
+        <div class="table-wrap" style="border:none;border-radius:0;margin:-4px -2px 0">
+          <table><thead><tr><th>Produto</th><th>Tipo</th><th>Qtd</th><th>OS</th><th>Técnico</th><th>Quando</th></tr></thead><tbody id="dash-mov"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUTOS -->
+    <section class="page" id="page-produtos">
+      <div class="page-header"><div><div class="page-title">Produtos</div><div class="page-sub">Todos os itens do estoque</div></div></div>
+      <div class="search-row">
+        <input type="text" id="search-prod" placeholder="🔍  Buscar produto ou código..." oninput="renderProdutos()">
+        <select id="filter-cat" onchange="renderProdutos()"><option value="">Todas as categorias</option></select>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Produto</th><th>Categoria</th><th>Unid.</th><th>Estoque atual</th><th>Mínimo</th><th>Status</th><th></th></tr></thead><tbody id="produtos-body"></tbody></table>
+      </div>
+    </section>
+
+    <!-- ENTRADA -->
+    <section class="page" id="page-entrada">
+      <div class="page-header"><div><div class="page-title">Registrar entrada</div><div class="page-sub">Compra, devolução ou ajuste de estoque</div></div></div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-link"></i>Vincular a uma OS <span style="color:var(--c-text3);font-size:10px">(opcional)</span></div>
+        <div class="os-picker" style="margin-bottom:18px">
+          <div id="ent-os-selected" class="os-selected-box" style="display:none"></div>
+          <div id="ent-os-search-wrap" class="os-search-wrap">
+            <i class="ti ti-search os-search-icon"></i>
+            <input type="text" id="ent-os-search" placeholder="Buscar por nº OS, equipe ou tipo..." autocomplete="off" oninput="filterOS('ent')" onfocus="showOSDropdown('ent')">
+            <div class="os-dropdown" id="ent-os-dropdown"></div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="form-grid">
+          <div class="field"><label>Produto *</label><select id="ent-produto"><option value="">Selecione...</option></select></div>
+          <div class="field"><label>Quantidade *</label><input type="number" id="ent-qtd" min="0.01" step="0.01" placeholder="0"></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Motivo</label><select id="ent-motivo"><option>Compra</option><option>Devolução de técnico</option><option>Transferência</option><option>Ajuste de inventário</option><option>Outro</option></select></div>
+          <div class="field"><label>Nº OS</label><input type="text" id="ent-os" placeholder="Preenchido pela OS acima" readonly></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Técnico</label><input type="text" id="ent-tec" placeholder="Preenchido pela OS ou manual"></div>
+          <div class="field"><label>Equipe</label><select id="ent-equipe"><option value="">—</option><option value="equipe1">Equipe 1</option><option value="equipe2">Equipe 2</option></select></div>
+        </div>
+        <div class="form-grid single"><div class="field"><label>Observação</label><textarea id="ent-obs" placeholder="Opcional..."></textarea></div></div>
+        <div class="form-grid single">
+          <div class="field">
+            <label>Foto da entrada <span style="color:var(--c-text3)">(opcional)</span></label>
+            <div class="photo-upload-area">
+              <input type="file" id="ent-foto-input" accept="image/*" onchange="previewFoto('ent')">
+              <i class="ti ti-camera"></i>
+              <span>Clique ou arraste uma foto</span>
+            </div>
+            <img id="ent-foto-preview" class="photo-preview" alt="preview">
+          </div>
+        </div>
+        <div class="btn-row"><button class="btn success" onclick="salvarMovimento('entrada')"><i class="ti ti-check"></i>Confirmar entrada</button></div>
+      </div>
+    </section>
+
+    <!-- SAÍDA -->
+    <section class="page" id="page-saida">
+      <div class="page-header"><div><div class="page-title">Registrar saída</div><div class="page-sub">Uso em OS, consumo interno ou empréstimo</div></div></div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-link"></i>Vincular a uma OS <span style="color:var(--c-accent);font-size:10px">(recomendado)</span></div>
+        <div class="os-picker" style="margin-bottom:18px">
+          <div id="sai-os-selected" class="os-selected-box" style="display:none"></div>
+          <div id="sai-os-search-wrap" class="os-search-wrap">
+            <i class="ti ti-search os-search-icon"></i>
+            <input type="text" id="sai-os-search" placeholder="Buscar por nº OS, equipe ou tipo..." autocomplete="off" oninput="filterOS('sai')" onfocus="showOSDropdown('sai')">
+            <div class="os-dropdown" id="sai-os-dropdown"></div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="form-grid">
+          <div class="field"><label>Produto *</label><select id="sai-produto" onchange="checkEstoque()"><option value="">Selecione...</option></select></div>
+          <div class="field"><label>Quantidade *</label><input type="number" id="sai-qtd" min="0.01" step="0.01" placeholder="0"></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Motivo</label><select id="sai-motivo"><option>Uso em OS</option><option>Uso interno</option><option>Empréstimo para técnico</option><option>Descarte</option><option>Perda / Extravio</option><option>Outro</option></select></div>
+          <div class="field"><label>Nº OS</label><input type="text" id="sai-os" placeholder="Preenchido pela OS acima" readonly></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Técnico</label><input type="text" id="sai-tec" placeholder="Preenchido pela OS ou manual"></div>
+          <div class="field"><label>Equipe</label><select id="sai-equipe"><option value="">—</option><option value="equipe1">Equipe 1</option><option value="equipe2">Equipe 2</option></select></div>
+        </div>
+        <div class="form-grid single"><div class="field"><label>Observação</label><textarea id="sai-obs" placeholder="Opcional..."></textarea></div></div>
+        <div class="form-grid single">
+          <div class="field">
+            <label>Foto da saída <span style="color:var(--c-text3)">(opcional)</span></label>
+            <div class="photo-upload-area">
+              <input type="file" id="sai-foto-input" accept="image/*" onchange="previewFoto('sai')">
+              <i class="ti ti-camera"></i>
+              <span>Clique ou arraste uma foto</span>
+            </div>
+            <img id="sai-foto-preview" class="photo-preview" alt="preview">
+          </div>
+        </div>
+        <div id="sai-alerta" class="alert"></div>
+        <div class="btn-row"><button class="btn danger" onclick="salvarMovimento('saida')"><i class="ti ti-check"></i>Confirmar saída</button></div>
+      </div>
+    </section>
+
+    <!-- HISTÓRICO -->
+    <section class="page" id="page-historico">
+      <div class="page-header"><div><div class="page-title">Histórico</div><div class="page-sub">Todas as movimentações registradas</div></div></div>
+      <div class="filter-bar">
+        <div><label>Período</label><select id="fil-periodo" onchange="renderHistorico()"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="0">Todos</option></select></div>
+        <div><label>Tipo</label><select id="fil-tipo" onchange="renderHistorico()"><option value="">Todos</option><option value="entrada">Entrada</option><option value="saida">Saída</option></select></div>
+        <div><label>Produto</label><select id="fil-prod" onchange="renderHistorico()"><option value="">Todos</option></select></div>
+        <div><label>Nº OS</label><input type="text" id="fil-os" placeholder="Ex: 1234" oninput="renderHistorico()"></div>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Motivo</th><th>OS</th><th>Técnico</th><th>Equipe</th><th>Foto</th></tr></thead><tbody id="hist-body"></tbody></table>
+      </div>
+    </section>
+
+    <!-- CADASTROS -->
+    <section class="page" id="page-cadastro">
+      <div class="page-header"><div><div class="page-title">Cadastros</div><div class="page-sub">Produtos e categorias</div></div><button class="btn danger" onclick="confirmarLimparEstoque()"><i class="ti ti-trash"></i>Zerar todo o estoque</button></div>
+      <div class="tabs">
+        <div class="tab active" data-tab="tab-novo-prod">Novo produto</div>
+        <div class="tab" data-tab="tab-categorias">Categorias</div>
+      </div>
+      <div class="tab-content" id="tab-novo-prod">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-plus"></i>Cadastrar produto</div>
+          <div class="form-grid">
+            <div class="field"><label>Nome *</label><input type="text" id="cad-nome" placeholder="ex: Fita de auto fusão"></div>
+            <div class="field"><label>Código</label><input type="text" id="cad-cod" placeholder="ex: FIB-001"></div>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>Categoria</label><select id="cad-cat"><option value="">Sem categoria</option></select></div>
+            <div class="field"><label>Unidade</label><select id="cad-unid"><option>un</option><option>m</option><option>rolo</option><option>cx</option><option>kg</option><option>pct</option><option>par</option><option>L</option></select></div>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>Estoque inicial</label><input type="number" id="cad-estoq" value="0" min="0"></div>
+            <div class="field"><label>Estoque mínimo (alerta)</label><input type="number" id="cad-min" value="0" min="0"></div>
+          </div>
+          <div class="form-grid single"><div class="field"><label>Descrição</label><textarea id="cad-desc" placeholder="Opcional..."></textarea></div></div>
+          <div class="form-grid single">
+            <div class="field">
+              <label>Foto do produto <span style="color:var(--c-text3)">(opcional)</span></label>
+              <div class="photo-upload-area">
+                <input type="file" id="cad-foto-input" accept="image/*" onchange="previewFoto('cad')">
+                <i class="ti ti-camera"></i>
+                <span>Clique ou arraste uma foto</span>
+              </div>
+              <img id="cad-foto-preview" class="photo-preview" alt="preview">
+            </div>
+          </div>
+          <div class="btn-row"><button class="btn primary" onclick="cadastrarProduto()"><i class="ti ti-plus"></i>Cadastrar produto</button></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-categorias" style="display:none">
+        <div class="card"><div class="card-title"><i class="ti ti-tag"></i>Categorias</div><div id="cat-list"></div></div>
+      </div>
+    </section>
+
+
+    <!-- GALERIA -->
+    <section class="page" id="page-galeria">
+      <div class="page-header">
+        <div><div class="page-title">Galeria de fotos</div><div class="page-sub">Fotos de produtos e movimentações</div></div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="gal-produtos">Produtos</div>
+        <div class="tab" data-tab="gal-movimentacoes">Movimentações</div>
+      </div>
+      <div class="tab-content" id="gal-produtos">
+        <div class="gallery-grid" id="gallery-produtos-grid"></div>
+      </div>
+      <div class="tab-content" id="gal-movimentacoes" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <select id="gal-fil-tipo" onchange="renderGaleria()" style="background:var(--c-surface);border:1px solid var(--c-border2);border-radius:var(--r);padding:8px 11px;font-size:13px;font-family:var(--font);color:var(--c-text);outline:none">
+            <option value="">Todos</option><option value="entrada">Entrada</option><option value="saida">Saída</option>
+          </select>
+        </div>
+        <div class="gallery-grid" id="gallery-mov-grid"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div id="modal-box" style="background:var(--c-surface);border:1px solid var(--c-border2);border-radius:20px;padding:28px 28px 24px;width:340px;max-width:90vw;box-shadow:0 24px 64px rgba(0,0,0,.6);transform:scale(.95);opacity:0;transition:all .2s cubic-bezier(.34,1.56,.64,1)">
+    <div style="width:44px;height:44px;border-radius:12px;background:var(--c-red-bg);border:1px solid var(--c-red-border);display:flex;align-items:center;justify-content:center;margin-bottom:18px"><i class="ti ti-trash" style="font-size:22px;color:var(--c-red)"></i></div>
+    <div style="font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:8px">Zerar todo o estoque?</div>
+    <div style="font-size:13px;color:var(--c-text2);line-height:1.6;margin-bottom:24px">Esta ação zerará <strong style="color:var(--c-text)">todos os produtos</strong> e apagará <strong style="color:var(--c-text)">todo o histórico</strong> permanentemente.<br><span style="color:var(--c-red);font-size:12px;font-family:var(--font-mono);margin-top:6px;display:block">Não poderá ser desfeita.</span></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" onclick="fecharModal()" style="flex:1;justify-content:center">Cancelar</button><button class="btn danger" onclick="executarZerarEstoque()" style="flex:1;justify-content:center"><i class="ti ti-trash"></i>Zerar tudo</button></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="assets/js/app.js"></script>
+<div id="lightbox"><img src="" alt="foto ampliada"></div>
+</body>
+</html>

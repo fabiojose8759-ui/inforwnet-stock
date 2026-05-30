@@ -1,0 +1,22 @@
+# Sistema operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs e temporarios
+*.log
+*.tmp
+*.temp
+
+# Configuracoes locais e segredos
+.env
+.env.*
+!.env.example
+
+# Dependencias/builds, caso o projeto ganhe ferramentas depois
+node_modules/
+dist/
+build/
+.cache/
+.parcel-cache/
+.vite/
