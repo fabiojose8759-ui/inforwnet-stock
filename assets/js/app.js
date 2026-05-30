@@ -2,7 +2,7 @@
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkcXJ3ZW9xc2plZnl6b3dpYmpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NzAwNjcsImV4cCI6MjA5NTI0NjA2N30.S7N6_D_SXAjnIBY3tbmN0cMzy5AvbIo3eIEGSo7p6Ss';
 const sb=supabase.createClient(SB_URL,SB_KEY);
 let produtos=[],categorias=[],movimentacoes=[],orders=[];
-let selectedOS={ent:null,sai:null,vei:null};
+let selectedOS={ent:null,sai:null};
 const tipoLabel={corretiva:'Corretiva',instalacao_kit:'Instalação Kit',preventiva:'Preventiva',mudanca_endereco:'Mudança End.'};
 const tipoClass={corretiva:'corretiva',instalacao_kit:'instalacao',preventiva:'preventiva',mudanca_endereco:'mudanca'};
 function eqLabel(t){return!t?'—':t==='equipe1'?'Equipe 1':t==='equipe2'?'Equipe 2':t}
@@ -60,7 +60,7 @@ function populateSelects(){
   const fc=$('filter-cat');if(fc)fc.innerHTML='<option value="">Todas as categorias</option>'+catOpts;
   const cc=$('cad-cat');if(cc)cc.innerHTML='<option value="">Sem categoria</option>'+catOpts;
   const pOpts='<option value="">Selecione...</option>'+produtos.map(p=>`<option value="${p.id}">${p.nome} — ${p.estoque_atual} ${p.unidade}</option>`).join('');
-  ['ent-produto','sai-produto','vei-produto'].forEach(id=>{const el=$(id);if(el)el.innerHTML=pOpts});
+  ['ent-produto','sai-produto'].forEach(id=>{const el=$(id);if(el)el.innerHTML=pOpts});
   const fp=$('fil-prod');if(fp)fp.innerHTML='<option value="">Todos</option>'+produtos.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');
 }
 
@@ -188,39 +188,6 @@ function checkEstoque(){
   if(p&&p.estoque_atual<=0){al.className='alert danger';al.style.display='block';al.textContent='⚠ Produto zerado no estoque!'}
   else if(p&&p.estoque_atual<=p.estoque_minimo){al.className='alert warning';al.style.display='block';al.textContent=`⚠ Estoque baixo: apenas ${p.estoque_atual} ${p.unidade} restantes.`}
   else al.style.display='none';
-}
-
-function checkVeiculoEstoque(){
-  const id=$('vei-produto')?.value;const p=produtos.find(x=>x.id===id);const al=$('vei-alerta');if(!al)return;
-  if(p&&p.estoque_atual<=0){al.className='alert danger';al.style.display='block';al.textContent='Produto zerado no estoque.'}
-  else if(p&&p.estoque_atual<=p.estoque_minimo){al.className='alert warning';al.style.display='block';al.textContent=`Estoque baixo: ${p.estoque_atual} ${p.unidade}.`}
-  else al.style.display='none';
-}
-
-async function salvarVeiculo(){
-  const acao=$('vei-acao')?.value||'lancar';
-  const produto_id=$('vei-produto')?.value;
-  const quantidade=parseFloat($('vei-qtd')?.value);
-  if(!produto_id){toast('Selecione um produto','err');return}
-  if(!quantidade||quantidade<=0){toast('Informe uma quantidade válida','err');return}
-  const tipo=acao==='devolver'?'entrada':'saida';
-  const motivo=acao==='devolver'?'Devolução de técnico':acao==='baixar'?'Baixa em veículo / OS':'Lançamento para veículo';
-  if(tipo==='saida'){
-    const prod=produtos.find(p=>p.id===produto_id);
-    if(prod&&prod.estoque_atual<quantidade){
-      const al=$('vei-alerta');if(al){al.className='alert danger';al.style.display='block';al.textContent=`Estoque insuficiente. Disponível: ${prod.estoque_atual} ${prod.unidade}.`}
-      return;
-    }
-  }
-  const data={produto_id,tipo,quantidade,motivo,os_numero:$('vei-os')?.value||null,tecnico:$('vei-tec')?.value||null,equipe:$('vei-equipe')?.value||null,observacao:$('vei-obs')?.value||null};
-  const{error}=await sb.from('estoque_movimentacoes').insert([data]);
-  if(error){toast('Erro: '+error.message,'err');return}
-  toast('Lançamento salvo','ok');
-  clearOS('vei');
-  ['vei-produto','vei-qtd','vei-obs'].forEach(id=>{const el=$(id);if(el)el.value=''});
-  const al=$('vei-alerta');if(al)al.style.display='none';
-  await loadAll();
-  showPage('page-veiculo');
 }
 
 async function salvarMovimento(tipo){
